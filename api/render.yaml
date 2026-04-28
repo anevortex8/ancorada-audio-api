@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ancorada-audio-api
+    runtime: docker
+    plan: starter
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-4-20250514
+      - key: MAX_TOKENS
+        value: "8000"
+      - key: ELEVENLABS_API_KEY
+        sync: false
+      - key: ELEVENLABS_DEFAULT_VOICE_ID
+        sync: false
+      - key: ELEVENLABS_DEFAULT_MODEL
+        value: eleven_multilingual_v2
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: SUPABASE_AUDIO_BUCKET
+        value: ancorada-audios

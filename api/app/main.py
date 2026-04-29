@@ -1,6 +1,9 @@
 """ANCORADA Audio API — FastAPI application."""
 from __future__ import annotations
+import base64
 import logging
+import re
+import unicodedata
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, HTTPException
@@ -16,7 +19,6 @@ from .models import (
 )
 from .script_generator import generate_audio_script
 from .elevenlabs_client import generate_audio_block, concatenate_mp3_blocks
-from .storage import upload_audio_to_supabase
 
 logging.basicConfig(level=logging.INFO, format="%(name)s | %(levelname)s | %(message)s")
 logger = logging.getLogger("ancorada-audio")
@@ -163,14 +165,6 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
         logger.exception("Erro na concatenação dos blocos")
         raise HTTPException(status_code=500, detail=f"Erro ao concatenar áudio: {str(e)}")
 
-    # Upload para Supabase
-    customer_name = req.customer_name or "cliente"
-    try:
-        audio_url = upload_audio_to_supabase(final_audio, customer_name)
-    except Exception as e:
-        logger.exception("Erro no upload para Supabase")
-        raise HTTPException(status_code=500, detail=f"Erro no upload do áudio: {str(e)}")
-
     # Calcular duração
     duration_seconds = None
     try:
@@ -181,16 +175,56 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
     except Exception:
         pass
 
+    # Gerar filename
+    customer_name = req.customer_name or "cliente"
+    slug = re.sub(r"[-\s]+", "-", unicodedata.normalize("NFKD", customer_name).encode("ascii", "ignore").decode("ascii").lower().strip())
+    filename = f"audio-ancorada-{slug}.mp3"
+
+    logger.info("[audio] mode=%s, file=%s, size=%d bytes", config.AUDIO_UPLOAD_MODE, filename, len(final_audio))
+
+    # Modo: supabase_upload (opcional, requer envs)
+    if config.AUDIO_UPLOAD_MODE == "supabase_upload":
+        from .storage import upload_audio_to_supabase
+        try:
+            audio_url = upload_audio_to_supabase(final_audio, customer_name)
+        except Exception as e:
+            logger.exception("Erro no upload para Supabase")
+            raise HTTPException(status_code=500, detail=f"Erro no upload do áudio: {str(e)}")
+
+        return GenerateAudioResponse(
+            audio_url=audio_url,
+            filename=filename,
+            audio_status="audio_ready",
+            duration_seconds=duration_seconds,
+            metadata={
+                "template": config.TEMPLATE_VERSION,
+                "provider": "elevenlabs",
+                "model": req.model_id,
+                "voice_id_used": bool(voice_id),
+                "blocks_count": len(req.audio_blocks),
+                "file_size_bytes": len(final_audio),
+                "upload_mode": "supabase_upload",
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+
+    # Modo padrão: return_base64
+    audio_b64 = base64.b64encode(final_audio).decode("utf-8")
+
     return GenerateAudioResponse(
-        audio_url=audio_url,
+        audio_base64=audio_b64,
+        filename=filename,
+        mime_type="audio/mpeg",
         audio_status="audio_ready",
         duration_seconds=duration_seconds,
         metadata={
             "template": config.TEMPLATE_VERSION,
-            "voice_id": voice_id,
-            "model_id": req.model_id,
+            "provider": "elevenlabs",
+            "model": req.model_id,
+            "voice_id_used": bool(voice_id),
             "blocks_count": len(req.audio_blocks),
             "file_size_bytes": len(final_audio),
+            "upload_mode": "return_base64",
             "generated_at": datetime.now(timezone.utc).isoformat(),
         },
     )

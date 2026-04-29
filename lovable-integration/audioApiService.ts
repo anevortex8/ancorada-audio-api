@@ -65,7 +65,10 @@ export interface GenerateAudioRequest {
 }
 
 export interface GenerateAudioResponse {
+  audio_base64: string;
   audio_url: string;
+  filename: string;
+  mime_type: string;
   audio_status: string;
   duration_seconds: number | null;
   metadata: Record<string, unknown>;

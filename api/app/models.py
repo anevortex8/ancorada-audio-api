@@ -60,7 +60,10 @@ class GenerateAudioRequest(BaseModel):
 
 
 class GenerateAudioResponse(BaseModel):
-    audio_url: str
-    audio_status: str
+    audio_base64: str = ""
+    audio_url: str = ""
+    filename: str = ""
+    mime_type: str = "audio/mpeg"
+    audio_status: str = ""
     duration_seconds: Optional[float] = None
     metadata: dict[str, Any] = {}

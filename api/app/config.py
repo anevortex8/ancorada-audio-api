@@ -15,4 +15,8 @@ SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
 SUPABASE_AUDIO_BUCKET = os.getenv("SUPABASE_AUDIO_BUCKET", "ancorada-audios")
 
+# return_base64 (default) = retorna MP3 em base64 para o frontend
+# supabase_upload = faz upload para Supabase Storage e retorna URL
+AUDIO_UPLOAD_MODE = os.getenv("AUDIO_UPLOAD_MODE", "return_base64")
+
 TEMPLATE_VERSION = "ancorada-audio-v1"

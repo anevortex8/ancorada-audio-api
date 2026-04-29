@@ -76,21 +76,34 @@ def _validate_signed_upload(signed) -> None:
         raise HTTPException(status_code=400, detail="signed_upload.signed_url precisa ser string")
 
 
-def _do_signed_upload(signed, audio_data: bytes, audio_generation_id: str = "", job_label: str = "") -> bool:
-    """Faz upload via signed URL. Retorna True se sucesso."""
+def _do_signed_upload(signed, audio_data: bytes, audio_generation_id: str = "", job_label: str = "") -> tuple[bool, str]:
+    """Faz upload via signed URL. Retorna (success, error_message)."""
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+
     token = signed.token.strip()
     base_url = signed.signed_url.strip()
 
-    # Montar URL com token como querystring
-    separator = "&" if "?" in base_url else "?"
-    upload_url = f"{base_url}{separator}token={token}"
+    # Montar URL com token via urllib.parse (nunca concatenação frágil)
+    parsed = urlparse(base_url)
+    existing_params = parse_qs(parsed.query, keep_blank_values=True)
 
-    logger.info("[audio-upload] mode=signed_upload")
-    logger.info("[audio-upload] audio_generation_id=%s", audio_generation_id or "(none)")
-    logger.info("[audio-upload] path=%s", signed.path)
-    logger.info("[audio-upload] token_type=%s", type(token).__name__)
-    logger.info("[audio-upload] signed_url_present=%s", bool(base_url))
-    logger.info("[audio-upload] mp3_size=%d", len(audio_data))
+    signed_url_has_token = "token" in existing_params
+
+    # Só adicionar token se a signed_url não trouxer um
+    if not signed_url_has_token:
+        existing_params["token"] = [token]
+
+    # Rebuild querystring com valores flat (não listas)
+    flat_params = {k: v[0] if isinstance(v, list) and len(v) == 1 else v for k, v in existing_params.items()}
+    new_query = urlencode(flat_params, doseq=True)
+    upload_url = urlunparse(parsed._replace(query=new_query))
+
+    upload_url_has_token = "token=" in upload_url
+
+    logger.info("[audio-upload] %stoken_type=%s", job_label, type(token).__name__)
+    logger.info("[audio-upload] %ssigned_url_has_token=%s", job_label, signed_url_has_token)
+    logger.info("[audio-upload] %supload_url_has_token=%s", job_label, upload_url_has_token)
+    logger.info("[audio-upload] %smp3_size=%d", job_label, len(audio_data))
 
     try:
         resp = requests.put(
@@ -104,19 +117,20 @@ def _do_signed_upload(signed, audio_data: bytes, audio_generation_id: str = "", 
             logger.info("[audio-upload] %saudio_generation_id=%s", job_label, audio_generation_id or "(none)")
             logger.info("[audio-upload] %sstorage_path=%s", job_label, signed.path)
             logger.info("[audio-upload] %sfinal_size=%d", job_label, len(audio_data))
-            return True
+            return True, ""
         else:
             error_text = resp.text[:300]
             try:
                 error_json = resp.json()
-                error_text = str(error_json)
+                error_text = str(error_json.get("message", error_json))
             except Exception:
                 pass
-            logger.error("[audio-upload] %suploaded=false, status=%d, error=%s", job_label, resp.status_code, error_text)
-            return False
-    except Exception:
+            logger.error("[audio-upload] %sresponse_status=%d", job_label, resp.status_code)
+            logger.error("[audio-upload] %sresponse_text=%s", job_label, error_text)
+            return False, error_text
+    except Exception as e:
         logger.exception("[audio-upload] %suploaded=false, exception", job_label)
-        return False
+        return False, str(e)
 
 
 def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, voice_source: str):
@@ -174,14 +188,14 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
                 upload_error = "path inválido"
                 logger.error("[job:%s] %s", job_id[:8], upload_error)
             else:
-                uploaded = _do_signed_upload(
+                uploaded, err = _do_signed_upload(
                     signed, final_audio,
                     audio_generation_id=req.audio_generation_id,
                     job_label=f"[job:{job_id[:8]}] ",
                 )
                 storage_path = signed.path
                 if not uploaded:
-                    upload_error = "Upload para Supabase falhou"
+                    upload_error = err or "Upload para Supabase falhou"
 
         # Status: completed somente se upload deu certo (quando signed_upload foi pedido)
         if upload_mode == "signed_upload" and not uploaded:
@@ -468,14 +482,23 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
 
         signed = req.signed_upload
         _validate_signed_upload(signed)
-        uploaded = _do_signed_upload(signed, final_audio)
+        uploaded, upload_err = _do_signed_upload(
+            signed, final_audio,
+            audio_generation_id=req.audio_generation_id,
+        )
+
+        if not uploaded:
+            raise HTTPException(
+                status_code=502,
+                detail=f"Upload para Supabase falhou: {upload_err}",
+            )
 
         return GenerateAudioResponse(
-            uploaded=uploaded,
+            uploaded=True,
             storage_path=signed.path,
             filename=filename,
             mime_type="audio/mpeg",
-            audio_status="audio_ready" if uploaded else "upload_failed",
+            audio_status="audio_ready",
             duration_seconds=duration_seconds,
             metadata={
                 "provider": "elevenlabs",
@@ -485,6 +508,7 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
                 "blocks_count": len(req.audio_blocks),
                 "file_size_bytes": len(final_audio),
                 "upload_mode": "signed_upload",
+                "audio_generation_id": req.audio_generation_id,
                 "generated_at": datetime.now(timezone.utc).isoformat(),
             },
         )

@@ -122,8 +122,12 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
         raise HTTPException(status_code=500, detail="ELEVENLABS_API_KEY not configured")
 
     voice_id = req.voice_id or config.ELEVENLABS_DEFAULT_VOICE_ID
+    logger.info("[audio] voice_id configured: %s", bool(voice_id))
     if not voice_id:
-        raise HTTPException(status_code=400, detail="voice_id é obrigatório (no body ou env ELEVENLABS_DEFAULT_VOICE_ID)")
+        raise HTTPException(
+            status_code=400,
+            detail="voice_id é obrigatório. Envie no body ou configure ELEVENLABS_DEFAULT_VOICE_ID ou ELEVENLABS_VOICE_ID no ambiente.",
+        )
 
     if not req.audio_blocks:
         raise HTTPException(status_code=400, detail="audio_blocks não pode ser vazio")

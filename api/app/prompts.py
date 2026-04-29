@@ -79,7 +79,16 @@ dedique mais tempo aos 2 mais intensos. Para os outros, uma frase basta: \
 "E tem também um Saturno Desorientado operando mais em silêncio, \
 mas que tá ali sustentando esse ciclo."
 
-ESTRUTURA DOS 4 BLOCOS (~300-450 palavras cada, total ~10-12 minutos):
+REGRA DE DURAÇÃO:
+- O áudio total DEVE ter entre 10 e 12 minutos (~1500-1800 palavras no total).
+- Cada bloco DEVE ter no MÁXIMO 450 palavras. Se passar, corte frases redundantes.
+- Seja concisa. Uma ideia por frase. Não repita a mesma ideia com palavras diferentes.
+- Prefira profundidade em menos palavras a cobrir tudo de forma superficial.
+- Para trânsitos: 2-3 frases por trânsito bastam. Não precisa explicar o que é cada planeta \
+toda vez — a cliente já leu o PDF. Foque no que muda na vida dela.
+- Para padrões secundários (os 2 que não são foco): 1-2 frases cada, no máximo.
+
+ESTRUTURA DOS 4 BLOCOS (MÁXIMO 450 palavras cada, total ~1500-1800 palavras / 10-12 min):
 
 BLOCO 1 — ABERTURA E ESSÊNCIA:
 Abrir como mensagem pessoal. Exemplo:

@@ -142,17 +142,23 @@ do mapa, os padrões, a chave-mãe e o próximo movimento com substância.
 4 padrões oficiais mencionados? Chave-mãe nomeada? 4+ trânsitos cobertos? \
 Nenhum padrão inventado? Se faltar algo, corrija antes de retornar.
 
-FORMATO DE SAÍDA (JSON):
-{
-  "audio_blocks": [
-    {"label": "BLOCO 1 — ABERTURA E ESSÊNCIA", "text": "..."},
-    {"label": "BLOCO 2 — PADRÕES DE ESTAGNAÇÃO", "text": "..."},
-    {"label": "BLOCO 3 — TRÂNSITOS E MOMENTO ATUAL", "text": "..."},
-    {"label": "BLOCO 4 — CHAVE-MÃE E PRÓXIMO MOVIMENTO", "text": "..."}
-  ]
-}
+FORMATO DE SAÍDA:
+Escreva o roteiro em texto natural usando os marcadores abaixo para separar os blocos. \
+NÃO use JSON. NÃO use markdown. Apenas texto com os marcadores:
 
-Retorne APENAS o JSON, sem markdown, sem ```json, sem explicações."""
+[BLOCO 1 — ABERTURA E ESSÊNCIA]
+(texto do bloco 1 aqui)
+
+[BLOCO 2 — PADRÕES PRINCIPAIS]
+(texto do bloco 2 aqui)
+
+[BLOCO 3 — TRÂNSITOS E MOMENTO ATUAL]
+(texto do bloco 3 aqui)
+
+[BLOCO 4 — CHAVE-MÃE E PRÓXIMO MOVIMENTO]
+(texto do bloco 4 aqui)
+
+Retorne APENAS o texto com os marcadores, sem explicações adicionais."""
 
 
 def safe_compact_for_prompt(value, max_depth: int = 3, max_items: int = 20, _depth: int = 0) -> str:

@@ -197,13 +197,16 @@ def generate_script_endpoint(req: AudioScriptRequest):
     birth_profile = req.birth_profile.model_dump() if req.birth_profile else None
 
     try:
-        blocks, full_script = generate_audio_script(
+        blocks, full_script, parser_used = generate_audio_script(
             customer_name=customer_name,
             birth_profile=birth_profile,
             diagnostic_text=req.diagnostic_text,
             diagnostic_json=req.diagnostic_json,
             chart_json=req.chart_json,
         )
+    except ValueError as e:
+        logger.warning("[audio-script] Roteiro insuficiente: %s", e)
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         logger.exception("[audio-script] Erro na geração do roteiro")
         raise HTTPException(status_code=500, detail=str(e))
@@ -221,6 +224,8 @@ def generate_script_endpoint(req: AudioScriptRequest):
             "word_count": word_count,
             "blocks_count": len(blocks),
             "source": source,
+            "style_mode": "whatsapp_voice_note",
+            "parser": parser_used,
             "diagnostic_id": req.diagnostic_id,
             "generated_at": datetime.now(timezone.utc).isoformat(),
         },

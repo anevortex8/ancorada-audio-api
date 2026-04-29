@@ -170,6 +170,8 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
                 uploaded = _do_signed_upload(signed, final_audio, job_label=f"[job:{job_id[:8]}] ")
                 storage_path = signed.path
 
+        upload_mode = "signed_upload" if (req.signed_upload and req.signed_upload.signed_url) else "none"
+
         _jobs[job_id].update({
             "status": "completed" if uploaded else "completed_no_upload",
             "uploaded": uploaded,
@@ -182,6 +184,7 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
             "voice_id_prefix": voice_id[:6] if voice_id else "",
             "model": req.model_id,
             "blocks_count": len(req.audio_blocks),
+            "upload_mode": upload_mode,
         })
         logger.info("[job:%s] completed, uploaded=%s, size=%d bytes", job_id[:8], uploaded, len(final_audio))
 
@@ -341,6 +344,7 @@ def audio_job_status(job_id: str):
             "completed_at": job.get("completed_at"),
             "metadata": {
                 "provider": "elevenlabs",
+                "upload_mode": job.get("upload_mode", ""),
                 "model": job.get("model", ""),
                 "voice_id_source": job.get("voice_id_source", ""),
                 "voice_id_prefix": job.get("voice_id_prefix", ""),

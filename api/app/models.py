@@ -50,6 +50,13 @@ class VoiceSettings(BaseModel):
     use_speaker_boost: bool = True
 
 
+class SignedUpload(BaseModel):
+    bucket: str = "ancorada-audios"
+    path: str = ""
+    signed_url: str = ""
+    token: str = ""
+
+
 class GenerateAudioRequest(BaseModel):
     audio_blocks: list[AudioBlock]
     voice_id: str = ""
@@ -57,11 +64,15 @@ class GenerateAudioRequest(BaseModel):
     voice_settings: VoiceSettings = VoiceSettings()
     speed: float = 0.97
     customer_name: str = ""
+    upload_mode: str = ""
+    signed_upload: Optional[SignedUpload] = None
 
 
 class GenerateAudioResponse(BaseModel):
     audio_base64: str = ""
     audio_url: str = ""
+    uploaded: Optional[bool] = None
+    storage_path: str = ""
     filename: str = ""
     mime_type: str = "audio/mpeg"
     audio_status: str = ""

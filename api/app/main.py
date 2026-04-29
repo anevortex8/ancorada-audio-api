@@ -6,6 +6,8 @@ import re
 import unicodedata
 from datetime import datetime, timezone
 
+import requests
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -199,10 +201,64 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
     slug = re.sub(r"[-\s]+", "-", unicodedata.normalize("NFKD", customer_name).encode("ascii", "ignore").decode("ascii").lower().strip())
     filename = f"audio-ancorada-{slug}.mp3"
 
-    logger.info("[audio] mode=%s, file=%s, size=%d bytes", config.AUDIO_UPLOAD_MODE, filename, len(final_audio))
+    # Determinar upload_mode: payload > env > default
+    upload_mode = req.upload_mode or config.AUDIO_UPLOAD_MODE or "return_base64"
+    logger.info("[audio] upload_mode=%s, file=%s, size=%d bytes, blocks=%d",
+                upload_mode, filename, len(final_audio), len(req.audio_blocks))
 
-    # Modo: supabase_upload (opcional, requer envs)
-    if config.AUDIO_UPLOAD_MODE == "supabase_upload":
+    # ── Modo: signed_upload (frontend envia signed URL do Supabase) ──
+    if upload_mode == "signed_upload":
+        if not req.signed_upload or not req.signed_upload.signed_url:
+            raise HTTPException(
+                status_code=400,
+                detail="signed_upload.signed_url é obrigatório no modo signed_upload.",
+            )
+
+        signed = req.signed_upload
+        upload_url = signed.signed_url
+        if signed.token and "?" not in upload_url:
+            upload_url = f"{upload_url}?token={signed.token}"
+        elif signed.token:
+            upload_url = f"{upload_url}&token={signed.token}"
+
+        try:
+            resp = requests.put(
+                upload_url,
+                data=final_audio,
+                headers={"Content-Type": "audio/mpeg"},
+                timeout=120,
+            )
+            uploaded = resp.status_code in (200, 201)
+            if not uploaded:
+                logger.error("[audio] signed upload failed: %d %s", resp.status_code, resp.text[:300])
+        except Exception as e:
+            logger.exception("[audio] signed upload error")
+            uploaded = False
+
+        logger.info("[audio] uploaded=%s, storage_path=%s", uploaded, signed.path)
+
+        return GenerateAudioResponse(
+            uploaded=uploaded,
+            storage_path=signed.path,
+            filename=filename,
+            mime_type="audio/mpeg",
+            audio_status="audio_ready" if uploaded else "upload_failed",
+            duration_seconds=duration_seconds,
+            metadata={
+                "template": config.TEMPLATE_VERSION,
+                "provider": "elevenlabs",
+                "model": req.model_id,
+                "voice_id_source": voice_source,
+                "voice_id_prefix": voice_id[:6] if voice_id else "",
+                "blocks_count": len(req.audio_blocks),
+                "file_size_bytes": len(final_audio),
+                "upload_mode": "signed_upload",
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+            },
+        )
+
+    # ── Modo: supabase_upload (legado, requer envs no Render) ──
+    if upload_mode == "supabase_upload":
         from .storage import upload_audio_to_supabase
         try:
             audio_url = upload_audio_to_supabase(final_audio, customer_name)
@@ -228,7 +284,7 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
             },
         )
 
-    # Modo padrão: return_base64
+    # ── Modo padrão: return_base64 (para testes curtos) ──
     audio_b64 = base64.b64encode(final_audio).decode("utf-8")
 
     return GenerateAudioResponse(
@@ -242,7 +298,7 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
             "provider": "elevenlabs",
             "model": req.model_id,
             "voice_id_source": voice_source,
-                "voice_id_prefix": voice_id[:6] if voice_id else "",
+            "voice_id_prefix": voice_id[:6] if voice_id else "",
             "blocks_count": len(req.audio_blocks),
             "file_size_bytes": len(final_audio),
             "upload_mode": "return_base64",

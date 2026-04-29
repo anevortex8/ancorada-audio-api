@@ -55,6 +55,13 @@ export interface VoiceSettings {
   use_speaker_boost?: boolean;
 }
 
+export interface SignedUpload {
+  bucket: string;
+  path: string;
+  signed_url: string;
+  token?: string;
+}
+
 export interface GenerateAudioRequest {
   audio_blocks: AudioBlock[];
   voice_id?: string;
@@ -62,11 +69,15 @@ export interface GenerateAudioRequest {
   voice_settings?: VoiceSettings;
   speed?: number;
   customer_name?: string;
+  upload_mode?: "return_base64" | "signed_upload";
+  signed_upload?: SignedUpload;
 }
 
 export interface GenerateAudioResponse {
   audio_base64: string;
   audio_url: string;
+  uploaded: boolean | null;
+  storage_path: string;
   filename: string;
   mime_type: string;
   audio_status: string;

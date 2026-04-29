@@ -123,12 +123,31 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
     if not config.ELEVENLABS_API_KEY:
         raise HTTPException(status_code=500, detail="ELEVENLABS_API_KEY not configured")
 
-    voice_id = req.voice_id or config.ELEVENLABS_DEFAULT_VOICE_ID
+    # Resolver voice_id: payload > env_default > env_legacy
+    # Ignorar valores inválidos (nomes como "Sarah", "Mayara", strings curtas)
+    INVALID_VOICE_IDS = {"", "sarah", "mayara", "default", "null", "none", "undefined"}
+    raw_voice = (req.voice_id or "").strip()
+    payload_valid = raw_voice.lower() not in INVALID_VOICE_IDS and len(raw_voice) > 10
+
+    if payload_valid:
+        voice_id = raw_voice
+        voice_source = "payload"
+    elif config.ELEVENLABS_DEFAULT_VOICE_ID:
+        voice_id = config.ELEVENLABS_DEFAULT_VOICE_ID
+        voice_source = "env_default"
+    else:
+        voice_id = ""
+        voice_source = "none"
+
+    logger.info("[audio] voice_id source: %s", voice_source)
     logger.info("[audio] voice_id configured: %s", bool(voice_id))
+    if voice_id:
+        logger.info("[audio] voice_id prefix: %s", voice_id[:6])
+
     if not voice_id:
         raise HTTPException(
             status_code=400,
-            detail="voice_id é obrigatório. Envie no body ou configure ELEVENLABS_DEFAULT_VOICE_ID ou ELEVENLABS_VOICE_ID no ambiente.",
+            detail="voice_id obrigatório. Configure ELEVENLABS_DEFAULT_VOICE_ID no Render ou envie voice_id no body.",
         )
 
     if not req.audio_blocks:
@@ -200,7 +219,8 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
                 "template": config.TEMPLATE_VERSION,
                 "provider": "elevenlabs",
                 "model": req.model_id,
-                "voice_id_used": bool(voice_id),
+                "voice_id_source": voice_source,
+                "voice_id_prefix": voice_id[:6] if voice_id else "",
                 "blocks_count": len(req.audio_blocks),
                 "file_size_bytes": len(final_audio),
                 "upload_mode": "supabase_upload",
@@ -221,7 +241,8 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
             "template": config.TEMPLATE_VERSION,
             "provider": "elevenlabs",
             "model": req.model_id,
-            "voice_id_used": bool(voice_id),
+            "voice_id_source": voice_source,
+                "voice_id_prefix": voice_id[:6] if voice_id else "",
             "blocks_count": len(req.audio_blocks),
             "file_size_bytes": len(final_audio),
             "upload_mode": "return_base64",

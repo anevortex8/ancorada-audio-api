@@ -66,6 +66,7 @@ class GenerateAudioRequest(BaseModel):
     customer_name: str = ""
     upload_mode: str = ""
     signed_upload: Optional[SignedUpload] = None
+    audio_generation_id: str = ""
 
 
 class GenerateAudioResponse(BaseModel):

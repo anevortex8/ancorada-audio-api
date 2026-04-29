@@ -76,7 +76,7 @@ def _validate_signed_upload(signed) -> None:
         raise HTTPException(status_code=400, detail="signed_upload.signed_url precisa ser string")
 
 
-def _do_signed_upload(signed, audio_data: bytes, job_label: str = "") -> bool:
+def _do_signed_upload(signed, audio_data: bytes, audio_generation_id: str = "", job_label: str = "") -> bool:
     """Faz upload via signed URL. Retorna True se sucesso."""
     token = signed.token.strip()
     base_url = signed.signed_url.strip()
@@ -86,6 +86,7 @@ def _do_signed_upload(signed, audio_data: bytes, job_label: str = "") -> bool:
     upload_url = f"{base_url}{separator}token={token}"
 
     logger.info("[audio-upload] mode=signed_upload")
+    logger.info("[audio-upload] audio_generation_id=%s", audio_generation_id or "(none)")
     logger.info("[audio-upload] path=%s", signed.path)
     logger.info("[audio-upload] token_type=%s", type(token).__name__)
     logger.info("[audio-upload] signed_url_present=%s", bool(base_url))
@@ -99,20 +100,22 @@ def _do_signed_upload(signed, audio_data: bytes, job_label: str = "") -> bool:
             timeout=120,
         )
         if resp.status_code in (200, 201):
-            logger.info("[audio-upload] %supload success: %d", job_label, resp.status_code)
+            logger.info("[audio-upload] %suploaded=true", job_label)
+            logger.info("[audio-upload] %saudio_generation_id=%s", job_label, audio_generation_id or "(none)")
+            logger.info("[audio-upload] %sstorage_path=%s", job_label, signed.path)
+            logger.info("[audio-upload] %sfinal_size=%d", job_label, len(audio_data))
             return True
         else:
-            # Log seguro sem HTML
             error_text = resp.text[:300]
             try:
                 error_json = resp.json()
                 error_text = str(error_json)
             except Exception:
                 pass
-            logger.error("[audio-upload] %supload failed: %d %s", job_label, resp.status_code, error_text)
+            logger.error("[audio-upload] %suploaded=false, status=%d, error=%s", job_label, resp.status_code, error_text)
             return False
     except Exception:
-        logger.exception("[audio-upload] %supload error", job_label)
+        logger.exception("[audio-upload] %suploaded=false, exception", job_label)
         return False
 
 
@@ -159,21 +162,35 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
         # Upload via signed URL
         uploaded = False
         storage_path = ""
+        upload_mode = "signed_upload" if (req.signed_upload and req.signed_upload.signed_url) else "none"
+        upload_error = ""
+
         if req.signed_upload and req.signed_upload.signed_url:
             signed = req.signed_upload
-            # Validação básica (sem HTTPException em thread)
             if not isinstance(signed.token, str) or not signed.token.strip():
-                logger.error("[job:%s] token inválido: tipo=%s", job_id[:8], type(signed.token).__name__)
+                upload_error = f"token inválido: tipo={type(signed.token).__name__}"
+                logger.error("[job:%s] %s", job_id[:8], upload_error)
             elif not isinstance(signed.path, str) or not signed.path.strip():
-                logger.error("[job:%s] path inválido", job_id[:8])
+                upload_error = "path inválido"
+                logger.error("[job:%s] %s", job_id[:8], upload_error)
             else:
-                uploaded = _do_signed_upload(signed, final_audio, job_label=f"[job:{job_id[:8]}] ")
+                uploaded = _do_signed_upload(
+                    signed, final_audio,
+                    audio_generation_id=req.audio_generation_id,
+                    job_label=f"[job:{job_id[:8]}] ",
+                )
                 storage_path = signed.path
+                if not uploaded:
+                    upload_error = "Upload para Supabase falhou"
 
-        upload_mode = "signed_upload" if (req.signed_upload and req.signed_upload.signed_url) else "none"
+        # Status: completed somente se upload deu certo (quando signed_upload foi pedido)
+        if upload_mode == "signed_upload" and not uploaded:
+            status = "failed"
+        else:
+            status = "completed"
 
         _jobs[job_id].update({
-            "status": "completed" if uploaded else "completed_no_upload",
+            "status": status,
             "uploaded": uploaded,
             "storage_path": storage_path,
             "filename": filename,
@@ -186,7 +203,10 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
             "blocks_count": len(req.audio_blocks),
             "upload_mode": upload_mode,
         })
-        logger.info("[job:%s] completed, uploaded=%s, size=%d bytes", job_id[:8], uploaded, len(final_audio))
+        if upload_error:
+            _jobs[job_id]["error"] = upload_error
+
+        logger.info("[job:%s] status=%s, uploaded=%s, size=%d bytes", job_id[:8], status, uploaded, len(final_audio))
 
     except Exception as e:
         logger.exception("[job:%s] failed", job_id[:8])
@@ -300,9 +320,11 @@ def generate_audio_async_endpoint(req: GenerateAudioRequest):
         "blocks_completed": 0,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "customer_name": req.customer_name or "cliente",
+        "audio_generation_id": req.audio_generation_id or "",
     }
 
-    logger.info("[audio-async] job %s created, blocks=%d", job_id[:8], len(req.audio_blocks))
+    logger.info("[audio-async] job %s created, blocks=%d, audio_generation_id=%s",
+                job_id[:8], len(req.audio_blocks), req.audio_generation_id or "(none)")
 
     thread = threading.Thread(
         target=_generate_and_upload,
@@ -327,15 +349,23 @@ def audio_job_status(job_id: str):
     if not job:
         raise HTTPException(status_code=404, detail=f"Job {job_id} não encontrado.")
 
+    status = job["status"]
+    # Normalizar: processing = pending ou generating
+    if status in ("pending", "generating"):
+        display_status = "processing"
+    else:
+        display_status = status
+
     response = {
         "job_id": job_id,
-        "status": job["status"],
+        "status": display_status,
+        "audio_generation_id": job.get("audio_generation_id", ""),
         "blocks_total": job.get("blocks_total", 0),
         "blocks_completed": job.get("blocks_completed", 0),
         "created_at": job.get("created_at"),
     }
 
-    if job["status"] in ("completed", "completed_no_upload"):
+    if status == "completed":
         response.update({
             "uploaded": job.get("uploaded", False),
             "storage_path": job.get("storage_path", ""),
@@ -353,9 +383,12 @@ def audio_job_status(job_id: str):
             },
         })
 
-    if job["status"] == "failed":
-        response["error"] = job.get("error", "Erro desconhecido")
-        response["completed_at"] = job.get("completed_at")
+    if status == "failed":
+        response.update({
+            "uploaded": False,
+            "error": job.get("error", "Erro desconhecido"),
+            "completed_at": job.get("completed_at"),
+        })
 
     return response
 

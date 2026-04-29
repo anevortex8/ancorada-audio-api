@@ -62,7 +62,7 @@ class GenerateAudioRequest(BaseModel):
     voice_id: str = ""
     model_id: str = "eleven_multilingual_v2"
     voice_settings: VoiceSettings = VoiceSettings()
-    speed: float = 0.97
+    speed: float = 1.03
     customer_name: str = ""
     upload_mode: str = ""
     signed_upload: Optional[SignedUpload] = None

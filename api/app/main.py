@@ -152,6 +152,7 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
                 style=req.voice_settings.style,
                 use_speaker_boost=req.voice_settings.use_speaker_boost,
                 speed=req.speed,
+                block_label=block.label,
             )
             audio_parts.append(audio_bytes)
             _jobs[job_id]["blocks_completed"] = i + 1
@@ -216,6 +217,9 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
             "model": req.model_id,
             "blocks_count": len(req.audio_blocks),
             "upload_mode": upload_mode,
+            "tts_speed": req.speed,
+            "script_sanitized": True,
+            "pronoun_style": "voce_seu_sua",
         })
         if upload_error:
             _jobs[job_id]["error"] = upload_error
@@ -394,6 +398,9 @@ def audio_job_status(job_id: str):
                 "voice_id_prefix": job.get("voice_id_prefix", ""),
                 "blocks_count": job.get("blocks_count", 0),
                 "file_size_bytes": job.get("file_size_bytes", 0),
+                "tts_speed": job.get("tts_speed", 1.03),
+                "script_sanitized": job.get("script_sanitized", True),
+                "pronoun_style": job.get("pronoun_style", "voce_seu_sua"),
             },
         })
 
@@ -443,6 +450,7 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
                 style=req.voice_settings.style,
                 use_speaker_boost=req.voice_settings.use_speaker_boost,
                 speed=req.speed,
+                block_label=block.label,
             )
             audio_parts.append(audio_bytes)
         except Exception as e:
@@ -509,6 +517,9 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
                 "file_size_bytes": len(final_audio),
                 "upload_mode": "signed_upload",
                 "audio_generation_id": req.audio_generation_id,
+                "tts_speed": req.speed,
+                "script_sanitized": True,
+                "pronoun_style": "voce_seu_sua",
                 "generated_at": datetime.now(timezone.utc).isoformat(),
             },
         )
@@ -530,6 +541,9 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
             "blocks_count": len(req.audio_blocks),
             "file_size_bytes": len(final_audio),
             "upload_mode": "return_base64",
+            "tts_speed": req.speed,
+            "script_sanitized": True,
+            "pronoun_style": "voce_seu_sua",
             "generated_at": datetime.now(timezone.utc).isoformat(),
         },
     )

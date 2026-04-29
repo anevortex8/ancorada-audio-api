@@ -2,6 +2,7 @@
 from __future__ import annotations
 import io
 import logging
+import re
 from typing import Optional
 
 import requests
@@ -12,6 +13,50 @@ logger = logging.getLogger("ancorada-audio")
 
 ELEVENLABS_TTS_URL = "https://api.elevenlabs.io/v1/text-to-speech"
 
+# Regex para remover stage directions entre colchetes ou parênteses
+_STAGE_DIRECTION_RE = re.compile(
+    r'[\[\(]\s*(?:pausa(?:\s+breve)?|respira|silêncio|silencio)\s*[\]\)]',
+    re.IGNORECASE,
+)
+
+# Substituições de pronomes (tu/teu/tua → você/seu/sua)
+_PRONOUN_REPLACEMENTS = [
+    (re.compile(r'\bcontigo\b', re.IGNORECASE), 'com você'),
+    (re.compile(r'\bpra ti\b', re.IGNORECASE), 'para você'),
+    (re.compile(r'\bpara ti\b', re.IGNORECASE), 'para você'),
+    (re.compile(r'\btuas\b', re.IGNORECASE), 'suas'),
+    (re.compile(r'\bteus\b', re.IGNORECASE), 'seus'),
+    (re.compile(r'\btua\b', re.IGNORECASE), 'sua'),
+    (re.compile(r'\bteu\b', re.IGNORECASE), 'seu'),
+]
+
+
+def sanitize_script_for_tts(text: str, block_label: str = "") -> str:
+    """Limpa o texto antes de enviar ao ElevenLabs.
+
+    - Remove stage directions: [pausa], (respira), etc.
+    - Normaliza pronomes: teu→seu, tua→sua, contigo→com você, etc.
+    """
+    # Contar e remover stage directions
+    directions_found = len(_STAGE_DIRECTION_RE.findall(text))
+    clean = _STAGE_DIRECTION_RE.sub('', text)
+
+    # Normalizar pronomes
+    pronoun_applied = False
+    for pattern, replacement in _PRONOUN_REPLACEMENTS:
+        if pattern.search(clean):
+            pronoun_applied = True
+            clean = pattern.sub(replacement, clean)
+
+    # Limpar espaços duplos resultantes
+    clean = re.sub(r'  +', ' ', clean).strip()
+
+    logger.info("[audio-tts] sanitized block label: %s", block_label)
+    logger.info("[audio-tts] removed stage directions: %d", directions_found)
+    logger.info("[audio-tts] pronoun normalization applied: %s", pronoun_applied)
+
+    return clean
+
 
 def generate_audio_block(
     text: str,
@@ -21,9 +66,13 @@ def generate_audio_block(
     similarity_boost: float = 0.8,
     style: float = 0.25,
     use_speaker_boost: bool = True,
-    speed: float = 0.97,
+    speed: float = 1.03,
+    block_label: str = "",
 ) -> bytes:
     """Gera áudio MP3 para um bloco de texto via ElevenLabs."""
+
+    # Sanitizar texto antes do TTS
+    clean_text = sanitize_script_for_tts(text, block_label=block_label)
 
     api_key = config.ELEVENLABS_API_KEY
     if not api_key:
@@ -38,7 +87,7 @@ def generate_audio_block(
     }
 
     payload = {
-        "text": text,
+        "text": clean_text,
         "model_id": model_id,
         "voice_settings": {
             "stability": stability,

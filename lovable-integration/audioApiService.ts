@@ -17,19 +17,23 @@ const ANCORADA_AUDIO_API_URL =
 
 export interface AudioScriptRequest {
   customer: {
-    full_name: string;
+    full_name?: string;
+    name?: string;
     email?: string;
   };
   diagnostic_text?: string;
-  diagnostic_json?: Record<string, unknown>;
-  birth_profile: {
+  diagnostic_json?: unknown;
+  diagnostic_id?: string;
+  diagnostic_pdf_url?: string;
+  product?: string;
+  birth_profile?: {
     birth_date: string; // YYYY-MM-DD
     birth_time: string; // HH:MM
     birth_city: string;
     birth_state?: string;
     birth_country?: string;
   };
-  chart_json?: Record<string, unknown>;
+  chart_json?: unknown;
 }
 
 export interface AudioBlock {
@@ -118,7 +122,7 @@ export async function generateFullAudio(
   // 2. Gerar MP3 via ElevenLabs (no backend)
   const audio = await generateAudio({
     audio_blocks: script.audio_blocks,
-    customer_name: scriptRequest.customer.full_name,
+    customer_name: scriptRequest.customer.full_name || scriptRequest.customer.name || "",
     ...voiceSettings,
   });
 

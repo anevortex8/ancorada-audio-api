@@ -2,6 +2,7 @@
 from __future__ import annotations
 import json
 import logging
+from typing import Any
 
 import anthropic
 
@@ -13,10 +14,10 @@ logger = logging.getLogger("ancorada-audio")
 
 def generate_audio_script(
     customer_name: str,
-    birth_profile: dict,
+    birth_profile: dict | None,
     diagnostic_text: str,
-    diagnostic_json: dict,
-    chart_json: dict,
+    diagnostic_json: Any = None,
+    chart_json: Any = None,
 ) -> tuple[list[dict], str]:
     """Retorna (audio_blocks, full_script_text)."""
 
@@ -26,11 +27,11 @@ def generate_audio_script(
         customer_name=customer_name,
         birth_profile=birth_profile,
         diagnostic_text=diagnostic_text,
-        diagnostic_json=diagnostic_json,
-        chart_json=chart_json,
+        diagnostic_json=diagnostic_json or {},
+        chart_json=chart_json or {},
     )
 
-    logger.info("Gerando roteiro de áudio para %s (model=%s)", customer_name, config.ANTHROPIC_MODEL)
+    logger.info("[audio-script] Gerando roteiro para %s (model=%s)", customer_name, config.ANTHROPIC_MODEL)
 
     response = client.messages.create(
         model=config.ANTHROPIC_MODEL,
@@ -45,7 +46,6 @@ def generate_audio_script(
     try:
         data = json.loads(raw_text)
     except json.JSONDecodeError:
-        # Tentar extrair JSON de dentro do texto
         import re
         match = re.search(r'\{[\s\S]*\}', raw_text)
         if match:
@@ -59,6 +59,6 @@ def generate_audio_script(
 
     full_script = "\n\n".join(f"[{b['label']}]\n{b['text']}" for b in blocks)
 
-    logger.info("Roteiro gerado: %d blocos, ~%d palavras", len(blocks), len(full_script.split()))
+    logger.info("[audio-script] Roteiro gerado: %d blocos, ~%d palavras", len(blocks), len(full_script.split()))
 
     return blocks, full_script

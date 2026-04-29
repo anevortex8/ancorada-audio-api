@@ -4,14 +4,18 @@ from typing import Any, Optional
 
 
 class Customer(BaseModel):
-    full_name: str
+    full_name: str = ""
+    name: str = ""
     email: str = ""
+
+    def get_name(self) -> str:
+        return self.full_name or self.name or "Cliente"
 
 
 class BirthProfile(BaseModel):
-    birth_date: str = Field(..., description="YYYY-MM-DD")
-    birth_time: str = Field(..., description="HH:MM")
-    birth_city: str
+    birth_date: str = Field("", description="YYYY-MM-DD")
+    birth_time: str = Field("", description="HH:MM")
+    birth_city: str = ""
     birth_state: str = ""
     birth_country: str = "Brasil"
 
@@ -24,9 +28,12 @@ class AudioBlock(BaseModel):
 class AudioScriptRequest(BaseModel):
     customer: Customer
     diagnostic_text: str = ""
-    diagnostic_json: dict[str, Any] = {}
-    birth_profile: BirthProfile
-    chart_json: dict[str, Any] = {}
+    diagnostic_json: Any = {}
+    diagnostic_id: str = ""
+    diagnostic_pdf_url: str = ""
+    product: str = "audio"
+    birth_profile: Optional[BirthProfile] = None
+    chart_json: Any = {}
 
 
 class AudioScriptResponse(BaseModel):

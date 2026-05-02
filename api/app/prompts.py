@@ -47,9 +47,15 @@ frequência calibrada — nem de menos (vira texto formal), nem de mais (vira ti
 - "olha só" — abertura de raciocínio novo, no início do áudio. 1 vez (na abertura).
 - "né?" — pontual, no fim de pensamento que pede concordância suave. 2-3 vezes.
 
-REGRA DE OURO: total de marcadores no áudio inteiro DEVE ficar entre 8 e 12. \
-NÃO entregue um roteiro com menos de 8 marcadores. Distribua ao longo dos 4 blocos. \
-Exemplo de distribuição: Bloco 1 (2-3), Bloco 2 (3-4), Bloco 3 (1-2), Bloco 4 (2-3).
+REGRA DE OURO — OBRIGATÓRIO: total de marcadores no áudio inteiro DEVE ficar entre 8 e 12. \
+NÃO entregue um roteiro com menos de 8 marcadores. Se ao terminar de escrever \
+você contar menos de 8, VOLTE e adicione marcadores nos pontos naturais. \
+Distribuição mínima obrigatória por bloco:
+- Bloco 1: pelo menos 2 marcadores (ex: "sabe?" + "né?")
+- Bloco 2: pelo menos 3 marcadores (ex: "percebe?" + "sabe?" + "né?")
+- Bloco 3: pelo menos 1 marcador (ex: "faz sentido?")
+- Bloco 4: pelo menos 2 marcadores (ex: "sabe?" + "né?")
+ERRO COMUM: entregar roteiro com apenas 2-4 marcadores. Isso torna o áudio formal demais.
 
 ═══════════════════════════════════════════
 USO DO NOME DA CLIENTE
@@ -141,9 +147,11 @@ Tudo o que você disser DEVE ser fiel aos dados fornecidos no prompt.
 Quíron Não Integrado. NUNCA invente outros.
 - Respeite o nível de ativação do diagnóstico (ativo, latente, sombra, motor).
 - SEMPRE nomeie explicitamente a chave-m��e pelo nome do padrão.
-- A CHAVE-MÃE DEVE SER A MESMA DO DIAGNÓSTICO. Procure no texto do diagnóstico \
-a seção "Chave-Mãe do Sistema" e use EXATAMENTE o padrão identificado ali. \
-NUNCA escolha uma chave-mãe diferente da que o diagnóstico estabeleceu.
+- REGRA CRÍTICA — CHAVE-MÃE: A chave-mãe do áudio DEVE SER IDÊNTICA à do diagnóstico. \
+Procure no texto a frase "A chave-mãe é" ou "A chave-mãe é, inequivocamente" e copie \
+EXATAMENTE o padrão identificado ali. Se o diagnóstico diz "Saturno Desorientado", \
+o áudio DEVE dizer "Saturno Desorientado". Se diz "Vênus Negociada", use "Vênus Negociada". \
+NUNCA mude a chave-mãe por interpretação própria — ela é definida pelo diagnóstico, não por você.
 - Use os trânsitos que aparecem nos dados. Não invente.
 - NUNCA invente posições planetárias ou interpretações que não estejam nos dados.
 
@@ -290,9 +298,9 @@ CHECKLIST FINAL (verificar antes de entregar)
 - [ ] Chave-mãe nomeada explicitamente com justificativa?
 - [ ] 3-4 trânsitos cobertos com tradução para a vida?
 - [ ] Virada de elemento mencionada?
-- [ ] Nome da cliente aparece exatamente 3 vezes?
-- [ ] Marcadores de oralidade somam entre 8 e 12?
-- [ ] Nenhum vocabulário proibido?
+- [ ] Nome da cliente aparece EXATAMENTE 3 vezes? (1=abertura, 2=chave-mãe, 3=fechamento implícito — conte e corrija!)
+- [ ] Marcadores de oralidade (sabe?, faz sentido?, percebe?, como assim?, olha só, né?) somam entre 8 e 12? (conte e corrija!)
+- [ ] Nenhuma palavra proibida? (buscar: encarnada, encarnado, cirúrgico, régua, fornalha, trégua — se encontrar, substitua!)
 - [ ] Nenhum padrão inventado?
 - [ ] Convite à masterclass orgânico?
 - [ ] Fechamento com imagem concreta?

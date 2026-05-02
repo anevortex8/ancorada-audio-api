@@ -14,10 +14,10 @@ logger = logging.getLogger("ancorada-audio")
 
 # Marcadores esperados nos blocos
 BLOCK_LABELS = [
-    "BLOCO 1 — ABERTURA E ESSÊNCIA",
-    "BLOCO 2 — PADRÕES PRINCIPAIS",
-    "BLOCO 3 — TRÂNSITOS E MOMENTO ATUAL",
-    "BLOCO 4 — CHAVE-MÃE E PRÓXIMO MOVIMENTO",
+    "BLOCO 1 — ABERTURA E SÍNTESE VIVA",
+    "BLOCO 2 — COREOGRAFIA ÚNICA",
+    "BLOCO 3 — CHAVE-MÃE E CUSTO EM VIDA",
+    "BLOCO 4 — GESTO ÚNICO E MASTERCLASS",
 ]
 
 # Regex flexível: [BLOCO 1 ...], [BLOCO 2 ...], etc.

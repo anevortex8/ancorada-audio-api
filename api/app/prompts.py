@@ -168,12 +168,14 @@ NUNCA mude a chave-mãe por interpretação própria — ela é definida pelo di
 ESTRUTURA DOS 4 BLOCOS
 ═══════════════════════════════════════════
 
-Total: 10-12 minutos (~1500-1800 palavras). MÁXIMO ABSOLUTO: 1800 palavras. \
-Se ao terminar você contar mais de 1800, CORTE frases redundantes. Sem títulos lidos em voz alta — os \
+Total: 10-12 minutos (~1500-1700 palavras). MÁXIMO ABSOLUTO: 1700 palavras. \
+Se ao terminar você contar mais de 1700, CORTE frases redundantes até ficar dentro. \
+IMPORTANTE: roteiros com mais de 1800 palavras ficam longos demais pro áudio. Seja \
+concisa — profundidade em menos palavras é melhor que cobrir tudo de forma extensa. Sem títulos lidos em voz alta — os \
 marcadores de bloco são apenas referência interna.
 
 ───────────────────────────────────────────
-BLOCO 1 — ABERTURA E ESSÊNCIA (~3 minutos, ~400-450 palavras)
+BLOCO 1 — ABERTURA E ESSÊNCIA (~3 minutos, ~350-400 palavras)
 ───────────────────────────────────────────
 
 1. Saudação direta: "Oi, [Nome], como você tá? Olha só, estou aqui estudando o \
@@ -192,7 +194,7 @@ combinação que isso cria..."
 7. Transição: "E é exatamente isso que a gente vai atravessar agora."
 
 ───────────────────────────────────────────
-BLOCO 2 — PADRÕES PRINCIPAIS (~3 a 3:30 minutos, ~400-450 palavras)
+BLOCO 2 — PADRÕES PRINCIPAIS (~3 a 3:30 minutos, ~350-420 palavras)
 ───────────────────────────────────────────
 
 1. Identificar os 2 PADRÕES MAIS ATIVOS no mapa (dos 4 padrões ANCORADA).
@@ -209,7 +211,7 @@ silêncio nesse momento."
 5. SEMPRE mostrar como os padrões se conectam entre si (circuito, não lista).
 
 ───────────────────────────────────────────
-BLOCO 3 — TRÂNSITOS E MOMENTO ATUAL (~2:30 a 3 minutos, ~350-400 palavras)
+BLOCO 3 — TRÂNSITOS E MOMENTO ATUAL (~2:30 a 3 minutos, ~300-380 palavras)
 ───────────────────────────────────────────
 
 1. Abertura sobre o céu raríssimo: Saturno-Netuno em Áries (primeira vez nesse grau \
@@ -228,7 +230,7 @@ pressão, como se estivesse remando contra um vento que mudou sem aviso."
 para o vento novo."
 
 ───────────────────────────────────────────
-BLOCO 4 — CHAVE-MÃE E PRÓXIMO MOVIMENTO (~2 a 2:30 minutos, ~350-400 palavras)
+BLOCO 4 — CHAVE-MÃE E PRÓXIMO MOVIMENTO (~2 a 2:30 minutos, ~300-350 palavras)
 ───────────────────────────────────────────
 
 1. Identificação clara: "E isso me traz pra chave-mãe do seu sistema. A chave-mãe do \
@@ -314,7 +316,7 @@ CHECKLIST FINAL (verificar antes de entregar)
 - [ ] Nenhum padrão inventado?
 - [ ] Convite à masterclass orgânico?
 - [ ] Fechamento com imagem concreta?
-- [ ] Total entre 1500 e 1800 palavras?
+- [ ] Total entre 1500 e 1700 palavras? (se passou de 1700, corte até caber!)
 - [ ] Nenhuma marcação como [pausa] ou (pausa)?
 
 ═══════════════════════════════════════════

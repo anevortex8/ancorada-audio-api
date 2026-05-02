@@ -514,7 +514,9 @@ def build_audio_prompt(customer_name: str, birth_profile: dict | None,
 
     # Fonte principal: diagnostic_text
     if diagnostic_text:
-        parts.append(f"\n--- DIAGNÓSTICO COMPLETO ---\n{diagnostic_text[:12000]}")
+        # Diagnósticos ANCORADA têm ~30-35k chars. A seção da chave-mãe fica no final.
+        # Truncar em 12k corta informação crítica. Enviar até 40k (cabe no contexto).
+        parts.append(f"\n--- DIAGNÓSTICO COMPLETO ---\n{diagnostic_text[:40000]}")
 
     # Fonte secundária: diagnostic_json
     if diagnostic_json:

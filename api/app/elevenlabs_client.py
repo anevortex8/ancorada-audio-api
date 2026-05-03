@@ -38,6 +38,7 @@ _PRONUNCIATION_REPLACEMENTS = [
     (re.compile(r'\bMasterclass\b'), 'Masterclés'),
     # Nomes de clientes
     (re.compile(r'\bCibele\b'), 'Cibéle'),
+    (re.compile(r'\bCibelee+\b'), 'Cibélee'),
     (re.compile(r'\bAngelica\b'), 'Angélica'),
     (re.compile(r'\bEmily\b'), 'Êmily'),
     (re.compile(r'\bFilomena\b'), 'Filomêna'),
@@ -163,10 +164,10 @@ def generate_audio_single(
     blocks: list[dict],
     voice_id: str,
     model_id: str = "eleven_multilingual_v2",
-    stability: float = 0.32,
-    similarity_boost: float = 0.70,
-    style: float = 0.62,
-    use_speaker_boost: bool = True,
+    stability: float = 0.55,
+    similarity_boost: float = 0.85,
+    style: float = 0.20,
+    use_speaker_boost: bool = False,
     speed: float = 1.035,
 ) -> bytes:
     """Gera áudio MP3 enviando o roteiro inteiro como uma única chamada ao ElevenLabs.

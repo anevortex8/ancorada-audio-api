@@ -86,13 +86,12 @@ Pistas de fala natural (OBRIGATÓRIO — tornam o TTS orgânico):
 - Usar mínimo 8-12 reticências ao longo do áudio inteiro
 
 ═══════════════════════════════════════════
-NOME DA CLIENTE — EXATAMENTE 3 VEZES
+NOME DA CLIENTE — EXATAMENTE 2 VEZES
 ═══════════════════════════════════════════
 
-1. Na abertura: "Oi, [Nome], como você está?"
-2. Na chave-mãe: "E é por isso, [Nome], que a chave-mãe é..."
-3. No convite à masterclass: "E é por isso, [Nome], que eu queria muito..."
-NENHUMA outra vez. Conte e corrija antes de entregar.
+1. Na chave-mãe: "E é por isso, [Nome], que a chave-mãe é..."
+2. No convite à masterclass: "E é por isso, [Nome], que eu queria muito..."
+NENHUMA outra vez. Conte e corrija antes de entregar. NÃO usar na abertura.
 
 ═══════════════════════════════════════════
 VOCABULÁRIO
@@ -132,14 +131,10 @@ ESTRUTURA DOS 4 BLOCOS (~1100-1300 palavras, 9-12 min)
 
 BLOCO 1 — ABERTURA + SÍNTESE VIVA (~1:30 a 2 min, ~200-280 palavras)
 
-Abertura padrão (adaptar com naturalidade, manter a essência):
-"Oi, [Nome]eee... tudo bem com você? Olha... eu sentei aqui, com calma, com o seu \
-mapa na minha frente, e quis te mandar esse áudio porque... é o complemento do \
-diagnóstico que você acabou de receber, tá? E o que eu vou te trazer agora é o que \
-sobra quando a gente atravessa as [N] páginas e chega no que importa de verdade. \
-Então... respira, toma um café, e vem comigo."
-IMPORTANTE: A abertura até "vem comigo" deve soar como abraço. Calorosa. Sem pressa. \
-Como quem liga pra uma amiga querida. O "Oi, [Nome]eee" com alongamento é OBRIGATÓRIO.
+Abertura padrão (OBRIGATÓRIA, usar exatamente assim):
+"O objetivo desse áudio é fazer um complemento à análise detalhada que você recebeu \
+em PDF. Então respira fundo, pega o seu café e vem comigo."
+SEM saudação. SEM "Oi, [Nome]". Ir direto ao ponto com tom acolhedor e calmo.
 
 Depois da abertura: NÃO listar Sol/Lua/Ascendente formalmente como 3 pontos separados. \
 Em vez disso, oferecer a SÍNTESE VIVA — uma leitura interpretativa em 2-3 parágrafos que:
@@ -187,11 +182,8 @@ metáforas que estão no PDF.
 ROTEIRO DE REFERÊNCIA — ANGÉLICA (modelo de tom e profundidade)
 ═══════════════════════════════════════════
 
-"Oi, Angélicaaa... tudo bem com você? Olha... eu sentei aqui, com calma, com o seu \
-mapa na minha frente, e quis te mandar esse áudio porque... é o complemento do \
-diagnóstico que você acabou de receber, tá? E o que eu vou te trazer agora é o que \
-sobra quando a gente atravessa as dezenove páginas e chega no que importa de verdade. \
-Então... respira, toma um café, e vem comigo.
+"O objetivo desse áudio é fazer um complemento à análise detalhada que você recebeu \
+em PDF. Então respira fundo, pega o seu café e vem comigo.
 
 Eu quero começar te dizendo uma coisa que talvez não tenha ficado clara no documento. \
 (...) Você é uma mulher que pensa o tempo todo. Não no sentido superficial. No sentido \
@@ -231,13 +223,10 @@ formalizado e profundo com a Mayara. O áudio NÃO pode mencionar conversas \
 específicas nem fatos pessoais — só pode reconhecer o vínculo de forma genérica.
 
 ABERTURA OBRIGATÓRIA (substituir a abertura padrão):
-"Oi, [Nome]eee... tudo bem com você? Olha... eu sentei aqui, com calma, com o seu \
-mapa na minha frente, e quis te mandar esse áudio porque... é o complemento do \
-diagnóstico que você acabou de receber, tá? E o que eu vou te trazer agora é o que \
-sobra quando a gente atravessa as [N] páginas e chega no que importa de verdade. \
-E você sabe que a gente já caminhou junto um pedaço dessa estrada... então esse \
-áudio também é uma continuação do que a gente vem trabalhando. Outra camada. Outro \
-ângulo. Então... respira, toma um café, e vem comigo."
+"O objetivo desse áudio é fazer um complemento à análise detalhada que você recebeu \
+em PDF. E você sabe que a gente já caminhou junto um pedaço dessa estrada... então \
+esse áudio também é uma continuação do que a gente vem trabalhando. Outra camada. \
+Outro ângulo. Então respira fundo, pega o seu café e vem comigo."
 
 FRASE 1 — inserir antes de apresentar a coreografia (transição do Bloco 1 pro 2):
 "...e eu acho que esse áudio é uma boa hora pra esse desenho aparecer inteiro pra você."

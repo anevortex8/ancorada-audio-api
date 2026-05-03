@@ -45,10 +45,10 @@ class AudioScriptResponse(BaseModel):
 
 
 class VoiceSettings(BaseModel):
-    stability: float = 0.32
-    similarity_boost: float = 0.70
-    style: float = 0.62
-    use_speaker_boost: bool = True
+    stability: float = 0.55
+    similarity_boost: float = 0.85
+    style: float = 0.20
+    use_speaker_boost: bool = False
 
 
 class SignedUpload(BaseModel):

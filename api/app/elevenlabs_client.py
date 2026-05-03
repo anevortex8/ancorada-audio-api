@@ -36,6 +36,17 @@ _PRONUNCIATION_REPLACEMENTS = [
     (re.compile(r'\bquíron\b'), 'kíron'),
     (re.compile(r'\bmasterclass\b', re.IGNORECASE), 'masterclés'),
     (re.compile(r'\bMasterclass\b'), 'Masterclés'),
+    # Nomes de clientes
+    (re.compile(r'\bCibele\b'), 'Cibéle'),
+    (re.compile(r'\bAngelica\b'), 'Angélica'),
+    (re.compile(r'\bEmily\b'), 'Êmily'),
+    (re.compile(r'\bFilomena\b'), 'Filomêna'),
+    (re.compile(r'\bHellen\b'), 'Élen'),
+    (re.compile(r'\bIsabela\b'), 'Isabéla'),
+    (re.compile(r'\bJosyara\b'), 'Josyára'),
+    (re.compile(r'\bLea\b'), 'Léa'),
+    (re.compile(r'\bMaricy\b'), 'Maricí'),
+    (re.compile(r'\bTaina\b'), 'Tainã'),
 ]
 
 

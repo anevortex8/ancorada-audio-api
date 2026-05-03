@@ -30,6 +30,14 @@ _PRONOUN_REPLACEMENTS = [
     (re.compile(r'\bteu\b', re.IGNORECASE), 'seu'),
 ]
 
+# Dicionário de pronúncia — corrige entonação/fonética de palavras específicas
+_PRONUNCIATION_REPLACEMENTS = [
+    (re.compile(r'\bQuíron\b'), 'Kíron'),
+    (re.compile(r'\bquíron\b'), 'kíron'),
+    (re.compile(r'\bmasterclass\b', re.IGNORECASE), 'masterclés'),
+    (re.compile(r'\bMasterclass\b'), 'Masterclés'),
+]
+
 
 def sanitize_script_for_tts(text: str, block_label: str = "") -> str:
     """Limpa o texto antes de enviar ao ElevenLabs.
@@ -48,8 +56,15 @@ def sanitize_script_for_tts(text: str, block_label: str = "") -> str:
             pronoun_applied = True
             clean = pattern.sub(replacement, clean)
 
-    # Limpar espaços duplos resultantes
+    # Aplicar correções de pronúncia
+    for pattern, replacement in _PRONUNCIATION_REPLACEMENTS:
+        clean = pattern.sub(replacement, clean)
+
+    # Garantir que o bloco termina com pontuação final forte
+    # para que o TTS aplique entonação de encerramento
     clean = re.sub(r'  +', ' ', clean).strip()
+    if clean and clean[-1] not in '.!?…':
+        clean += '.'
 
     logger.info("[audio-tts] sanitized block label: %s", block_label)
     logger.info("[audio-tts] removed stage directions: %d", directions_found)
@@ -62,11 +77,11 @@ def generate_audio_block(
     text: str,
     voice_id: str,
     model_id: str = "eleven_multilingual_v2",
-    stability: float = 0.5,
-    similarity_boost: float = 0.8,
-    style: float = 0.25,
+    stability: float = 0.38,
+    similarity_boost: float = 0.78,
+    style: float = 0.42,
     use_speaker_boost: bool = True,
-    speed: float = 1.03,
+    speed: float = 1.05,
     block_label: str = "",
 ) -> bytes:
     """Gera áudio MP3 para um bloco de texto via ElevenLabs."""
@@ -115,7 +130,7 @@ def generate_audio_block(
     return audio_bytes
 
 
-def concatenate_mp3_blocks(blocks: list[bytes], silence_ms: int = 1500) -> bytes:
+def concatenate_mp3_blocks(blocks: list[bytes], silence_ms: int = 850) -> bytes:
     """Concatena blocos MP3 com silêncio entre eles usando pydub."""
     from pydub import AudioSegment
 

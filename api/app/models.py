@@ -45,9 +45,9 @@ class AudioScriptResponse(BaseModel):
 
 
 class VoiceSettings(BaseModel):
-    stability: float = 0.30
-    similarity_boost: float = 0.72
-    style: float = 0.58
+    stability: float = 0.38
+    similarity_boost: float = 0.76
+    style: float = 0.35
     use_speaker_boost: bool = True
 
 
@@ -63,7 +63,7 @@ class GenerateAudioRequest(BaseModel):
     voice_id: str = ""
     model_id: str = "eleven_multilingual_v2"
     voice_settings: VoiceSettings = VoiceSettings()
-    speed: float = 1.05
+    speed: float = 1.035
     customer_name: str = ""
     upload_mode: str = ""
     signed_upload: Optional[SignedUpload] = None

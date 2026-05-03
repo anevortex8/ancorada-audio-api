@@ -283,6 +283,7 @@ def generate_script_endpoint(req: AudioScriptRequest):
             diagnostic_text=req.diagnostic_text,
             diagnostic_json=req.diagnostic_json,
             chart_json=req.chart_json,
+            is_mentorada=req.is_mentorada,
         )
     except ValueError as e:
         logger.warning("[audio-script] Roteiro insuficiente: %s", e)

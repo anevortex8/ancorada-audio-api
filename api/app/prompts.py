@@ -194,6 +194,43 @@ O que falta não é mais entendimento. O que falta é a coragem de receber sem t
 compreendido primeiro."
 
 ═══════════════════════════════════════════
+VARIAÇÃO MENTORADA ÍNTIMA (aplicar APENAS quando indicado no prompt)
+═══════════════════════════════════════════
+
+Quando o prompt indicar "MODO MENTORADA", a cliente já tem vínculo de mentoria \
+formalizado e profundo com a Mayara. O áudio NÃO pode mencionar conversas \
+específicas nem fatos pessoais — só pode reconhecer o vínculo de forma genérica.
+
+ABERTURA OBRIGATÓRIA (substituir a abertura padrão):
+"Oi, [Nome], tudo bem? Olha só, esse áudio é o complemento do diagnóstico que \
+você acabou de receber. Eu sentei aqui com calma, com o seu mapa em mãos, e o \
+que eu vou te trazer agora é o que sobra quando a gente atravessa as [N] páginas \
+e chega no que importa de verdade. E você sabe que a gente já caminhou junto um \
+pedaço dessa estrada. Então esse áudio também é uma continuação do que a gente \
+vem trabalhando. Outra camada. Outro ângulo. Então respira, toma um café, e vem comigo."
+
+FRASE 1 — inserir antes de apresentar a coreografia (transição do Bloco 1 pro 2):
+"...e eu acho que esse áudio é uma boa hora pra esse desenho aparecer inteiro pra você."
+
+FRASE 2 — inserir depois de antecipar o desconforto do gesto (Bloco 4):
+"...esse desconforto é exatamente o trabalho. É o sinal de que você tá tocando \
+no circuito certo. E você sabe disso. A gente já viu esse padrão operando antes."
+
+CONVITE À MASTERCLASS — versão mentorada íntima:
+"E é por isso, [Nome], que eu queria muito que você estivesse comigo na masterclass \
+ANCORADA, no dia [DATA]. Porque ali eu não quero te explicar de novo o que você já \
+leu. Eu quero te ajudar a praticar esse gesto, ao vivo, com seu mapa aberto na tela. \
+E pra você, que já caminha comigo há um tempo, a masterclass é mais uma camada do \
+trabalho que a gente já vem fazendo."
+
+REGRAS DA MENTORADA:
+- Tom mais íntimo, como quem já conhece a pessoa e seus processos
+- Referências genéricas: "nosso trabalho", "o que a gente vem construindo", "essa \
+caminhada", "a gente já viu esse padrão operando"
+- NUNCA mencionar sessões específicas, datas, conversas ou fatos pessoais
+- NUNCA inventar detalhes da relação de mentoria
+
+═══════════════════════════════════════════
 CHECKLIST FINAL
 ═══════════════════════════════════════════
 
@@ -399,13 +436,17 @@ def _extract_chart_summary(chart_json) -> str:
 
 def build_audio_prompt(customer_name: str, birth_profile: dict | None,
                        diagnostic_text: str, diagnostic_json: Any,
-                       chart_json: Any) -> str:
+                       chart_json: Any, is_mentorada: bool = False) -> str:
     """Monta o prompt do usuário para geração do roteiro.
 
     Prioridade: diagnostic_text > diagnostic_json > chart_json.
     Nunca quebra com estruturas inesperadas.
     """
     parts = [f"Nome da cliente: {customer_name}"]
+
+    if is_mentorada:
+        parts.append("\n>>> MODO MENTORADA ATIVO — Esta cliente é mentorada da Mayara. "
+                     "Aplicar a variação de tom mentorada conforme instruções do system prompt. <<<\n")
 
     # Birth profile (opcional)
     if birth_profile and isinstance(birth_profile, dict):

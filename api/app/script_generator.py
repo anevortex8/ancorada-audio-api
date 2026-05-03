@@ -90,6 +90,7 @@ def generate_audio_script(
     diagnostic_text: str,
     diagnostic_json: Any = None,
     chart_json: Any = None,
+    is_mentorada: bool = False,
 ) -> tuple[list[dict], str, str]:
     """Retorna (audio_blocks, full_script_text, parser_used)."""
 
@@ -101,6 +102,7 @@ def generate_audio_script(
         diagnostic_text=diagnostic_text,
         diagnostic_json=diagnostic_json or {},
         chart_json=chart_json or {},
+        is_mentorada=is_mentorada,
     )
 
     logger.info("[audio-script] Gerando roteiro para %s (model=%s)", customer_name, config.ANTHROPIC_MODEL)

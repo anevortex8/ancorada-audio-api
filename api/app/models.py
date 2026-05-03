@@ -32,6 +32,7 @@ class AudioScriptRequest(BaseModel):
     diagnostic_id: str = ""
     diagnostic_pdf_url: str = ""
     product: str = "audio"
+    is_mentorada: bool = False
     birth_profile: Optional[BirthProfile] = None
     chart_json: Any = {}
 

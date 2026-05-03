@@ -152,9 +152,9 @@ def generate_audio_single(
     blocks: list[dict],
     voice_id: str,
     model_id: str = "eleven_multilingual_v2",
-    stability: float = 0.38,
-    similarity_boost: float = 0.76,
-    style: float = 0.35,
+    stability: float = 0.32,
+    similarity_boost: float = 0.70,
+    style: float = 0.62,
     use_speaker_boost: bool = True,
     speed: float = 1.035,
 ) -> bytes:

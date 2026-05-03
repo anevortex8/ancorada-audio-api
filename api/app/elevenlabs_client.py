@@ -213,5 +213,13 @@ def generate_audio_single(
     if len(audio_bytes) < 1000:
         raise ValueError("ElevenLabs retornou áudio muito pequeno, possível erro silencioso")
 
-    logger.info("[audio-single] Áudio gerado: %d bytes", len(audio_bytes))
-    return audio_bytes
+    # Adicionar silêncio no final para evitar corte abrupto do MP3
+    from pydub import AudioSegment
+    segment = AudioSegment.from_mp3(io.BytesIO(audio_bytes))
+    segment += AudioSegment.silent(duration=1200)
+    output = io.BytesIO()
+    segment.export(output, format="mp3", bitrate="192k")
+    final_bytes = output.getvalue()
+
+    logger.info("[audio-single] Áudio gerado: %d bytes (com tail pad)", len(final_bytes))
+    return final_bytes

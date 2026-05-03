@@ -22,7 +22,7 @@ from .models import (
     GenerateAudioResponse,
 )
 from .script_generator import generate_audio_script
-from .elevenlabs_client import generate_audio_block, concatenate_mp3_blocks
+from .elevenlabs_client import generate_audio_block, concatenate_mp3_blocks, generate_audio_single
 
 logging.basicConfig(level=logging.INFO, format="%(name)s | %(levelname)s | %(message)s")
 logger = logging.getLogger("ancorada-audio")
@@ -139,27 +139,20 @@ def _generate_and_upload(job_id: str, req: GenerateAudioRequest, voice_id: str, 
         _jobs[job_id]["status"] = "generating"
         _jobs[job_id]["started_at"] = datetime.now(timezone.utc).isoformat()
 
-        # Gerar áudio bloco a bloco
-        audio_parts: list[bytes] = []
-        for i, block in enumerate(req.audio_blocks):
-            logger.info("[job:%s] bloco %d/%d: %s", job_id[:8], i + 1, len(req.audio_blocks), block.label)
-            audio_bytes = generate_audio_block(
-                text=block.text,
-                voice_id=voice_id,
-                model_id=req.model_id,
-                stability=req.voice_settings.stability,
-                similarity_boost=req.voice_settings.similarity_boost,
-                style=req.voice_settings.style,
-                use_speaker_boost=req.voice_settings.use_speaker_boost,
-                speed=req.speed,
-                block_label=block.label,
-            )
-            audio_parts.append(audio_bytes)
-            _jobs[job_id]["blocks_completed"] = i + 1
-
-        # Concatenar
-        logger.info("[job:%s] concatenando %d blocos", job_id[:8], len(audio_parts))
-        final_audio = concatenate_mp3_blocks(audio_parts)
+        # Gerar áudio em chamada única para consistência de tom
+        logger.info("[job:%s] gerando áudio single (%d blocos)", job_id[:8], len(req.audio_blocks))
+        blocks_data = [{"label": b.label, "text": b.text} for b in req.audio_blocks]
+        final_audio = generate_audio_single(
+            blocks=blocks_data,
+            voice_id=voice_id,
+            model_id=req.model_id,
+            stability=req.voice_settings.stability,
+            similarity_boost=req.voice_settings.similarity_boost,
+            style=req.voice_settings.style,
+            use_speaker_boost=req.voice_settings.use_speaker_boost,
+            speed=req.speed,
+        )
+        _jobs[job_id]["blocks_completed"] = len(req.audio_blocks)
 
         # Duração
         duration_seconds = None
@@ -438,35 +431,25 @@ def generate_audio_endpoint(req: GenerateAudioRequest):
     if not req.audio_blocks:
         raise HTTPException(status_code=400, detail="audio_blocks não pode ser vazio")
 
-    audio_parts: list[bytes] = []
-    for i, block in enumerate(req.audio_blocks):
-        logger.info("Gerando áudio bloco %d/%d: %s", i + 1, len(req.audio_blocks), block.label)
-        try:
-            audio_bytes = generate_audio_block(
-                text=block.text,
-                voice_id=voice_id,
-                model_id=req.model_id,
-                stability=req.voice_settings.stability,
-                similarity_boost=req.voice_settings.similarity_boost,
-                style=req.voice_settings.style,
-                use_speaker_boost=req.voice_settings.use_speaker_boost,
-                speed=req.speed,
-                block_label=block.label,
-            )
-            audio_parts.append(audio_bytes)
-        except Exception as e:
-            logger.exception("Erro no bloco %d (%s)", i + 1, block.label)
-            raise HTTPException(
-                status_code=502,
-                detail=f"ElevenLabs falhou no bloco {i + 1} ({block.label}): {str(e)}",
-            )
-
-    logger.info("Concatenando %d blocos de áudio", len(audio_parts))
+    logger.info("Gerando áudio single (%d blocos)", len(req.audio_blocks))
     try:
-        final_audio = concatenate_mp3_blocks(audio_parts)
+        blocks_data = [{"label": b.label, "text": b.text} for b in req.audio_blocks]
+        final_audio = generate_audio_single(
+            blocks=blocks_data,
+            voice_id=voice_id,
+            model_id=req.model_id,
+            stability=req.voice_settings.stability,
+            similarity_boost=req.voice_settings.similarity_boost,
+            style=req.voice_settings.style,
+            use_speaker_boost=req.voice_settings.use_speaker_boost,
+            speed=req.speed,
+        )
     except Exception as e:
-        logger.exception("Erro na concatenação dos blocos")
-        raise HTTPException(status_code=500, detail=f"Erro ao concatenar áudio: {str(e)}")
+        logger.exception("Erro na geração de áudio")
+        raise HTTPException(
+            status_code=502,
+            detail=f"ElevenLabs falhou: {str(e)}",
+        )
 
     duration_seconds = None
     try:

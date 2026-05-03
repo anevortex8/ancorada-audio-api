@@ -146,3 +146,72 @@ def concatenate_mp3_blocks(blocks: list[bytes], silence_ms: int = 850) -> bytes:
     output = io.BytesIO()
     combined.export(output, format="mp3", bitrate="192k")
     return output.getvalue()
+
+
+def generate_audio_single(
+    blocks: list[dict],
+    voice_id: str,
+    model_id: str = "eleven_multilingual_v2",
+    stability: float = 0.38,
+    similarity_boost: float = 0.78,
+    style: float = 0.42,
+    use_speaker_boost: bool = True,
+    speed: float = 1.05,
+) -> bytes:
+    """Gera áudio MP3 enviando o roteiro inteiro como uma única chamada ao ElevenLabs.
+
+    Isso garante tom e velocidade consistentes ao longo de todos os blocos.
+    Blocos são separados por quebras de parágrafo para pausas naturais.
+    """
+    # Juntar todos os blocos com separação de parágrafo natural
+    full_text_parts = []
+    for block in blocks:
+        text = block.get("text", "") if isinstance(block, dict) else block.text
+        label = block.get("label", "") if isinstance(block, dict) else block.label
+        clean = sanitize_script_for_tts(text, block_label=label)
+        full_text_parts.append(clean)
+
+    # Separar blocos com dupla quebra de linha — ElevenLabs interpreta como pausa natural
+    full_text = "\n\n\n".join(full_text_parts)
+
+    logger.info("[audio-single] Gerando áudio único: %d chars, %d blocos", len(full_text), len(blocks))
+
+    api_key = config.ELEVENLABS_API_KEY
+    if not api_key:
+        raise ValueError("ELEVENLABS_API_KEY não configurada")
+
+    url = f"{ELEVENLABS_TTS_URL}/{voice_id}"
+
+    headers = {
+        "xi-api-key": api_key,
+        "Content-Type": "application/json",
+        "Accept": "audio/mpeg",
+    }
+
+    payload = {
+        "text": full_text,
+        "model_id": model_id,
+        "voice_settings": {
+            "stability": stability,
+            "similarity_boost": similarity_boost,
+            "style": style,
+            "use_speaker_boost": use_speaker_boost,
+        },
+        "speed": speed,
+    }
+
+    response = requests.post(url, json=payload, headers=headers, timeout=300)
+
+    if response.status_code != 200:
+        error_detail = response.text[:500]
+        logger.error("ElevenLabs erro %d: %s", response.status_code, error_detail)
+        raise ValueError(
+            f"ElevenLabs retornou status {response.status_code}: {error_detail}"
+        )
+
+    audio_bytes = response.content
+    if len(audio_bytes) < 1000:
+        raise ValueError("ElevenLabs retornou áudio muito pequeno, possível erro silencioso")
+
+    logger.info("[audio-single] Áudio gerado: %d bytes", len(audio_bytes))
+    return audio_bytes
